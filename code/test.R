@@ -39,16 +39,10 @@ library(here)
 ## Set working directory to the location of this script
 
 # Note: You can set the working directory in R using the setwd() function.
-# You can get the current working directory using the getwd() function.
-# You can use the rprojroot package to set the working directory to the location of this script.
-
-root <- rprojroot::find_root(rprojroot::is_rscript)
-
-setwd(root)
-
-## Print the current working directory to confirm it is set correctly
 
 setwd(here()) # Sets the working directory to the project root
+
+# You can get the current working directory using the getwd() function.
 
 print(paste("Current working directory is set to:", getwd()))
 
