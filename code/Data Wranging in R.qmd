@@ -1,0 +1,695 @@
+---
+title: "Data Wrangling in R"
+author: "Patrick Chester"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: pdf_document
+---
+
+What is Data Wrangling?
+- The process of transforming and mapping data from a raw form into another format that allows for more convenient consumption of the data with the goal of making it more appropriate for analysis.
+
+# I. Brief Overview of Data Types
+
+Remove all objects and packages in your current environment
+
+```{r}
+rm(list = ls())
+```
+
+##  Vectors 
+
+```{r}
+v1 <- rnorm(100, 75, 15)
+v2 <- as.factor(rep(c("A", "B", "C", "D"), times = 25))
+v3 <- rnorm(100, 1, .5) 
+```
+
+You can subset vectors using index numbers
+```{r}
+v2[1:10]
+v2[c(4, 8, 12)]
+```
+
+## Data Frames
+
+Extracting variables from a data frame using a \$ operator.
+
+```{r}
+mydata <- data.frame(v1, v2, v3)
+
+mydata$v1
+```
+
+Selecting a subset of a data frame using row indexes and column names
+
+```{r}
+mydata[1:10, c("v1", "v2")]
+```
+
+Other methods of data type conversion:
+- as.numeric() 
+- as.character()
+- as.vector() 
+- as.matrix() 
+- as.data.frame()
+- as.factor()
+
+
+# II. Data Management
+
+## A. Working with Strings
+
+### Regular expressions
+
+*grep:* Identifying strings that match a particular criteria
+```{r}
+states <- c('Alabama', 'New York', 'Colorado', 'Minnesota', 'South Carolina', 'Wyoming', 'New Jersey', 'Nevada', 'Texas', 'Iowa', 'Maine')
+
+grep(pattern = 'a', states, value = TRUE, ignore.case = TRUE)
+```
+
+*gsub:* Replacing instances of a string with another of your choosing
+```{r}
+gsub(pattern = "South", replacement = "North", states[5])
+```
+
+*gregexpr:* Identifying positions of a string of interest
+```{r}
+(positions_a <- gregexpr(pattern = "a", text = states, ignore.case = TRUE))
+```
+
+
+### Paste
+
+Use separators to combine strings with other characters or numbers
+```{r}
+paste("X", 1:5, sep = ".")
+```
+
+Use collapse to combine multiple string outputs together
+```{r}
+paste("X", 1:5, sep = ".", collapse = "")
+```
+
+paste0 is the same as paste with an empty separator
+```{r}
+paste0("X", 1:5)
+```
+
+NOTE: paste0 does not have a "sep" option that can be modified by the user
+
+paste0("a", "b", sep = "c") == paste0("a", "b", "c")
+
+paste0(rep(c("A","C","G","T"), each=4), c("A","C","G","T"), collapse = "")
+
+### Extra material: Other string manipulations
+
+Changing the case of strings
+```{r}
+string1 <- 'Stevens Institute of Technology'
+tolower(string1)
+toupper(string1)
+```
+
+### Exercise 1: Exercise with Strings (3 minutes)
+
+Create this string 'A&1B&2C&3' using a paste function
+
+
+
+## B. Working with Dates
+
+```{r}
+dates <- c('11/28/2011', '12/07/2012', '08/01/2013', '02/09/2015')
+class(dates)
+```
+
+```{r}
+real_dates <- as.Date(dates, format = '%m/%d/%Y')
+class(real_dates)
+```
+
+```{r}
+other_format <- format(real_dates, '%A %B %d, %Y')
+class(other_format)
+```
+
+
+For the codes used to identify and format dates:
+```{r}
+?strptime
+```
+
+Identifying how long ago dates occurred
+```{r}
+today <- Sys.Date()
+
+(dif <- today - real_dates)
+
+class(dif)
+```
+
+To make a difference in times with a particular time unit of interest use difftime
+
+```{r}
+difftime(today, real_dates, units = "hours")
+```
+
+
+### Extra Materials: Lubridate
+
+The lubridate package contains a powerful set of tools that can be used to extract and interact with dates.
+
+There are functions like *mdy* that allow for simpler extration of date information from strings.
+```{r}
+#install.packages("lubridate")
+library(lubridate, quietly = TRUE)
+
+(lubri_dates <- mdy(dates))
+```
+
+Extracting specific date information from a date object
+```{r}
+year(lubri_dates)
+
+month(lubri_dates)
+
+day(lubri_dates)
+```
+
+
+### Exercise 2: Exercise with Dates
+
+a. Take the following date (November 11, 2011) and turn it into a date vector in R
+b. Display the date vector in the format (month.day.year')
+
+## C. Subsetting Data Sets
+
+
+Loading star data into our environment from the `data` directory
+```{r}
+# Change the directory location to wherever your Data-Storytelling-2026 directory is
+star <- read.csv("~/Dropbox/SIT/SIT_Classes/Public_Pages/Data-Storytelling-2026/supplemental/DSS/STAR.csv")
+head(star)
+```
+
+### Selecting Cases using base R
+
+Identifying index numbers of interest
+```{r}
+which(star$classtype == 'small')  # reports indicies       
+which(star$reading > 600)
+```
+
+Use indices to select rows w/ selected columns                                              
+```{r}
+star[which(star$classtype == 'small'), c('classtype', 'reading')]
+```
+
+*subset:* subset data frames in base R 
+```{r}
+subset(star, reading > 600, c('classtype', 'reading'))
+```
+
+
+### Select rows and columns with dplyr, using the |> operator
+
+*filter:* select rows
+```{r}
+# install.packages('dplyr')
+
+library(dplyr, quietly = TRUE)
+
+star |> filter(reading > 600) |> head()
+```
+
+*select:* Select columns 
+```{r}
+star |> select(classtype, reading) |> head()
+```
+
+Select rows and columns by combining *filter* and *select* with *|>*
+```{r}
+star |> filter(reading > 600) |> select(classtype, reading) |> head()
+```
+
+## D. Sorting Data 
+
+### Sorting vectors
+
+*sort:* the sort function only works for vectors
+```{r, error=TRUE}
+sort(star$reading)  
+sort(star)
+```
+
+### Sorting data frames using index numbers
+
+Order produces index numbers of input vector arranged so that output vector is arranged in ascending order
+
+```{r}
+order(star$reading)  
+
+star[order(star$reading), c('classtype', 'reading')] |> head()
+
+star[order(star$classtype, -star$reading), ] |> head()
+```
+
+
+### Sorting with dplyr
+
+```{r}
+star |> arrange(classtype, desc(reading)) |> head()
+```
+
+
+
+### Exercise 3: Exercise with subsetting (3 minutes)
+
+Create a subset of mydata, which contains the 25 highest v1 scores
+
+
+## E. Converting panel data from long to wide and vice versa 
+
+Make a Panel Dataset
+```{r}
+health <- data.frame(id = rep(1:10, each = 4, len = 40),
+                     trial = rep(c(1:4), 10), 
+                     score = rnorm(40, 3, .75))
+
+head(health, n = 5)
+```
+
+### Reshaping with the reshape function
+
+Long --> Wide
+```{r}
+health_wide <- reshape(health, v.names = "score", idvar = "id", 
+                       timevar = "trial", direction = "wide") 
+
+tail(health_wide, n = 5)
+```
+
+
+Wide --> Long
+```{r}
+health_long <- reshape(health_wide, idvar = "id", direction = "long")         
+
+head(health_long, 5)
+```
+
+### Reshaping panel data using the tidyr package
+
+*spread:* Convert long data to wide
+```{r}
+# install.packages('tidyr')
+library(tidyr, quietly = TRUE)
+
+spread(health, key = trial, value = score) # key is the identifier
+```
+
+*gather:* Convert wide data to long
+```{r}
+gather(health_wide, key = trial, value = score, score.1:score.4) # can also reference by column number(2:5)
+```
+
+### Exercise 4: Exercise with reshaping
+
+Determine if the dataset below is long or wide, and reshape 
+
+```{r, eval=FALSE}
+data_reshape <- data.frame(State = rep(state.name, 4), year = rep(2010:2013, each = 50), GSPPC = rnorm(200, mean = 40000, sd = 10000))
+```
+
+
+## F. Merge Datasets 
+
+Create two data with common variables
+```{r}
+(data1 <- data.frame(id = rep(1:5, 3), year = rep(2000:2002, each = 5), 
+                     group = sample(c("A", "B", "C"), 15, replace = TRUE)))
+
+```
+
+```{r}
+(data2 <- data.frame(id = rep(1:5, each = 4), year = rep(2000:2003, 5),
+                    score = rnorm(20, 50, 15)))
+```
+
+### Merging using base R's merge function
+
+Merge them by id & year, 1:1 merge
+```{r}
+data_merge <- merge(data1, data2, by = c("id", "year")) 
+
+head(data_merge)
+```
+
+Is there anything odd about the merge? *Hint:* look at the year.
+
+
+Extra rows from both datasets are added.
+
+```{r}
+data_merge <- merge(data1, data2, by = c("id", "year"), all = TRUE) 
+
+head(data_merge)
+```
+
+If you wanted to do a left merge: x.all=TRUE
+A right merge: y.all=TRUE
+
+### Merging with the dplyr package
+
+*inner_join*
+```{r}
+inner_merge <- data1 |> inner_join(data2, by = c("id", "year"))
+
+head(inner_merge)
+```
+
+*full_join*
+```{r}
+outer_merge <- data1 |> full_join(data2, by = c("id", "year"))
+
+head(outer_merge)
+```
+
+### Exercise 5: Exercise with merging
+
+Merge the following data set to data1
+
+```{r}
+(data3 <- data.frame(id = rep(1:5, each = 4), year = rep(2000:2003, 5),
+                    response = sample(1:5, size = 20, replace = TRUE)))
+```
+
+
+## G. Apply function and Aggregate Statistics 
+
+### Apply functions
+Apply mean() across numeric nutrition variables in the star dataset     
+
+With MARGIN = 1, apply calculates the *mean* over rows.
+```{r}
+apply(star[, 2:3], MARGIN = 1, FUN = mean)  
+```
+
+With MARGIN = 2, apply calculates the *mean* over columns.
+```{r}
+apply(star[, 2:3], MARGIN = 2, FUN = mean)
+```
+
+Apply sd() across numeric nutrition variables in the star dataset      
+```{r}
+lapply(star[, 2:3], sd)
+sapply(star[, 2:3], sd)
+```
+
+
+An application of sapply to our vector of fruit names from section 1
+```{r}
+(num_a <- sapply(positions_a, function(x) ifelse(x[1] > 0, length(x), 0)))
+```
+
+### Aggregation with Base R 
+
+*tapply:* Summarizes a variable by a grouping variable and return a vector or an array.
+```{r}
+tapply(star$reading, star$classtype, summary)
+```
+
+*aggregate:* Similar to tapply, but it outputs a data frame.
+```{r}
+aggregate(star$reading, list(star$classtype), mean)
+```
+
+### Aggregation with dplyr
+
+Use *group_by* and *summarize* to produce a data frame that produces summary statistics over your grouping variable(s)
+
+```{r}
+star |> 
+  group_by(classtype) |> 
+  summarize(avg.reading = mean(reading))
+```
+
+You can compute multiple summary statistics at once, such as a count of the number of students in each class type.
+```{r}
+star |> 
+  group_by(classtype) |> 
+  summarize(avg.reading = mean(reading), count = n())
+```
+
+dplyr's *mutate* function allows users to create variables. When combined with *group_by* it allows for the creation of summary variables that are added to the original data frame.
+```{r}
+star |> 
+  group_by(classtype) |> 
+  mutate(avg.reading = mean(reading), count = n())
+```
+
+
+### Exercise 6: Exercise with aggregation (3 minutes)
+
+Using one of the methods above, find the median math score of students by their graduation status
+
+
+# III. Functions
+
+Structure of a function in R
+```{r, eval=FALSE}
+function.name <- function(arg1, arg2, ...) {
+  function_body
+  return(any_value_to_return)
+  }
+```
+
+
+
+Create a simple function that adds two numbers: 'a' and 'b'
+```{r}
+addTwoNums <- function(a, b) {
+  tmp <- a + b
+  return(tmp)
+  # Alternatively either of the below would substitue for the above
+  # return(a + b)
+  # a + b
+}
+
+addTwoNums(2, 1)
+```
+
+Does this work? Why or why not?
+```{r, error=TRUE}
+addTwoNums(5)
+```
+
+We can set default values for parameters in a function
+```{r}
+addTwoNums <- function(a, b = 2) {
+  return(a + b)
+}
+
+addTwoNums(5)
+```
+
+Simple functions are vectorized in R by default, allowing you to run your function over the elements of a vector (assuming other inputs are constant).
+```{r}
+addTwoNums(a = c(4, 10, 0))
+```
+
+What happens in this case?
+```{r}
+addTwoNums(3, 4)
+```
+
+
+Multiple results to report 
+
+```{r}
+myOperations <- function(a, b) {
+  add <- a + b
+  subtract <- a - b
+  multiply <- a * b
+  divide <- a / b
+  mylist <- list(add, subtract, multiply, divide)
+  return(mylist)
+}
+
+myOperations(5, 10)
+```
+
+
+## Extra Materials
+
+Graph a function 
+```{r}
+f <- function(x) (x ^ 3 - 13)
+
+plot(-5:6, f(-5:6), type = "l", ylab = "f(x) = x ^ 3 - 13", xlab = "")
+```
+
+*switch:* A function that returns different output depending on the input
+Returns output depending on an index number
+```{r}
+switch(1, c("one", "two"),c("three", "four"))
+```
+
+*switch:* Returns output depending on labels
+```{r}
+switch("second", first = c("one", "two"), second = c("three", "four"))
+```
+
+A function that takes a numeric vector and performs a significance test with user defined parameters.
+```{r}
+my_ttest <- function(x, mu = 0, test = "two-sided", alpha = 0.05) {
+  n <- length(x)
+  df <- n - 1
+  std <- sqrt(var(x))
+  t <- sqrt(n) * (mean(x) - mu) / std  
+  tail_area <- switch(test, "two-sided" = 2 * (1 - pt(abs(t), n - 1)),
+                      lower = pt(abs(t), df), upper = 1 - pt(abs(t), df))
+  list(t.statistics = t, degree.freedom = df, p.value = tail_area)
+}
+
+my_ttest(v1)
+
+```
+
+### Exercise 7: Exercise with functions
+
+Create a function that identifies the second largest element in a numeric vector
+
+# IV. For Loop
+
+Loops allow you to iterate over inputs to produce outputs in a similar way we saw with the apply functions. In fact, apply functions are themselves loops! Writing your own loops gives you the ability to solve more complex problems that couldn't be easily solved with the suite of apply functions.
+
+Simple loop that prints out university names where *univ* is the vector if inputs and *i* is the variable of the loop.
+```{r}
+univ <- c("Yale", "Harvard", "Pittsburg", "Stevens", "Rutgers")
+for (i in univ) {
+  print(i)
+}
+```
+
+A more sophisticated loop where each i th element in the output is the sum of i and all previous values of the input vector.
+```{r}
+out <- 0
+for (i in c(1, 2, 4, 5))  {
+  out <- out + i
+  print(out)
+}
+```
+
+
+### Exercise 8: Exercise with functions
+
+Create a function that produces a data frame that contains the classtype of the five students with the highest math scores. Hint: see the above example
+
+
+**END OF LECTURE**
+
+If you are interested in additional resources to learn about R, check out r-bloggers at the link below:
+
+```{r}
+browseURL("https://www.r-bloggers.com/")
+```
+
+Consider the material below to be supplemental.
+
+# V. If/Else Statements
+
+## If and else statements
+
+If and else statements allow you to specify outputs that depend on the values of an input
+```{r}
+x <- 10
+if (x > 10) {
+  print ("Greater than 10")
+} else if (x == 10) {
+  print ("Equal to 10")
+} else if (x < 10 && x >= 0) {
+  print ("Between 0 and 10")
+} else {
+  print ("Less than 0")
+}
+```
+
+
+## The ifelse function 
+
+This function allows you to apply a test over a vector where the output for each vector element is defined in the *ifelse* function.
+```{r}
+x <- seq(1:4)
+
+ifelse(test = x < 4, # The test
+       yes = "less than 4", # What the function returns when the test is true
+       no = "more than equal to 4") # What is returned when the test is false
+```
+
+
+# VI. While Loop
+
+While loops allow you to specify a condition that will end the loop.
+
+This while loop ends when i is less than or equal to 5.
+```{r}
+i <- 1
+while (i <= 5) {
+  i <- i + 2
+  print(i)
+}
+```
+
+Here, the while loop ends when univ takes the value of Rutgers.
+```{r}
+univ <- c("Yale", "Harvard", "Pittsburg", "Stevens", "Rutgers")
+i <- 1
+while(univ[i] != "Rutgers") {
+  print(univ[i])
+  i <- i + 1
+}
+```
+
+Create a fuction with a while loop 
+```{r}
+univ_while <- function(x) {
+  i <- 1
+  while(x[i] != "Stevens") {
+    print(x[i])
+    i <- i + 1
+  }
+}
+
+univ_while(univ)
+```
+
+# VII. Repeat Loop
+
+Repeats an action until a *break* condition is met. Functions similarly to the *while* loop, except the *break* is located in the function itself.
+
+```{r}
+i <- 2
+repeat {
+  print(i)
+  i <- i + 2
+  if (i > 20) break
+}
+```
+
+
+```{r}
+univ <- c("Yale", "Harvard", "Pittsburg", "Stevens", "Rutgers")   
+f_repeat <- function(x) {
+  i <- 1
+  repeat { 
+  print(x[i])
+  i <- i + 1
+  if (x[i] == "Stevens") break
+  }
+}
+
+f_repeat(univ)
+```
+
+
