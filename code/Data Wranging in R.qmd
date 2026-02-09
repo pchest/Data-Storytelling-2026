@@ -586,6 +586,11 @@ for (i in c(1, 2, 4, 5))  {
 
 Create a function that produces a data frame that contains the classtype of the five students with the highest math scores. Hint: see the above example
 
+### Final Exercise
+
+- Read in the anes data set and identify missing values
+- Create a subset that removes those missing values
+- Calculate the average age within each state
 
 **END OF LECTURE**
 
