@@ -1,0 +1,431 @@
+---
+title: "Basics of R"
+author: "Patrick Chester: Professor at SIT"
+date: 'Last Updated: February 8th, 2026'
+output: pdf_document
+---
+
+
+## I. Overview of R's Interface
+
+The 4 panel layout:
+- *Code panel:* where you write your code
+- *Console panel:* where you can run code and see the output
+- *Environment panel:* where you can see the objects you have created
+- *Files panel:* where you can see your files and set your working directory
+
+If you use VS Code, then it should look pretty familiar
+
+For quarto or R Markdown documents, you insert a code block using Ctrl + Alt + i
+
+```{r}
+2 + 2
+```
+
+If nothing else, R is a really good calculator!
+
+## II. R Fundamentals
+
+### Comments
+
+Comments are annotations in code to make code easier to understand. Comments are written with a '#' in front. To comment out an entire section of code use Ctrl Shift 'C'.
+
+```{r}
+## This is a comment (it will not execute anything behind the hashtag)
+cat("This function will output text that will appear in your final output.")
+```
+
+
+### Assignments
+
+We can assign values to names using the assignment statement: '<-', which is just a less than sign '<' followed by a minus sign '-'.
+
+```{r}
+add <- 2 + 3
+add
+```
+A shortcut to create the assignment statement is 'Alt' '-'.
+
+### Functions
+
+A function in R is the name of the function, followed by the parentheses. All of the arguments of the function are contained within the parentheses and can be set by the user.
+
+```{r collapse = TRUE}
+sqrt(2^3)
+sqrt(add)
+```
+
+### Data Types
+
+#### 1. Vectors
+
+Tie more than one value to a name by using the *'c'* function, which stands for 'combine.'
+
+```{r}
+vec1 <- c(4.6, 4.8, 5.2, 6.3, 6.8, 7.1, 7.2, 7.4, 7.5, 8.6)
+vec2 <- c('UT', 'IA', 'MN', 'AL', 'WI', 'MN', 'OH', 'IA', 'NY', 'IA')
+```
+
+Index vectors by using the square braces [ ].
+
+```{r}
+vec2[1:3]
+vec2[c(1,3)]
+```
+
+There are some functions which can be used on all types of vectors whether it is character or numeric.
+```{r eval =FALSE}
+length(vec1)
+length(vec2)
+class(vec1)
+class(vec2)
+```
+
+There are other functions which only make sense to run on a numeric vector.
+```{r eval = FALSE}
+mean(vec1)
+var(vec1)
+sum(vec1)
+max(vec1)
+```
+
+Transform the type of a vector
+
+```{r eval = FALSE}
+as.character(vec1)
+as.factor(vec1)
+```
+
+Vectors can undergo all sorts of math and manipulations.
+
+```{r eval = FALSE}
+vec1+1
+vec1*5
+rep(1, times = 10)
+rep(vec1, times = 5)
+round(vec1/3, 2)
+floor(vec1)
+```
+
+#### 2. Matrices
+
+A matrix brings two or more vectors together. There cannot be mixed data types within a matrix, i.e. a matrix is either all numeric or all character.
+
+```{r}
+m1 <- cbind(vec1, vec2)
+m1
+```
+
+Index a matrix with braces: [rows, columns].
+
+```{r eval = FALSE}
+m1[, 1]
+m1[2, ]
+```
+
+
+#### 3. Data Frames
+
+A data frame can hold all different classes of vectors.
+
+```{r}
+df1 <- data.frame(vec1, vec2)
+```
+
+Reference via brackets : dataframe[rows, columns]
+
+```{r eval = FALSE}
+df1[, 1] 
+df1[, 2]
+df1[, 'vec1']
+```
+
+Reference columns (variables) using the '$'.
+
+```{r eval = FALSE}
+df1$vec1
+df1$vec2
+```
+
+#### 4. Lists
+
+A list is a container that can hold almost anything in one of its components. 
+
+```{r}
+l1 <- list(vec1, df1, m1)
+```
+
+Reference a component by using double braces '[[ ]]' and an element within the component with following single braces '[ ].'
+
+```{r eval = FALSE}
+l1[[1]]
+l1[[2]][2]
+```
+
+
+### Missing Data
+
+A missing value is represented by an 'NA', which is neither character or numeric. 
+
+```{r}
+vec3 <- c(4.6, 4.8, 5.2, 6.3, 6.8, 7.1, 7.2, 7.4, 7.5, 8.6, NA)
+```
+
+Math functions, such as the *'sum'* function, will be unable to compute if there is a missing value in the data. To calculate the sum, we can set the argument na.rm = TRUE, which will remove the missing value from the calculation without removing the missing value from the vector.
+
+```{r collapse = TRUE}
+sum(vec3)
+sum(vec3, na.rm = TRUE)
+```
+
+___
+## III. Getting Started with R
+
+### A. Working Directory
+
+A working directory is the path to where your data files are and/or where you want to save your files to.
+
+```{r eval = FALSE}
+getwd()
+setwd('C:/Users/Documents') # Example dir structure in Windows
+setwd('~/Documents') # Example dir structure in Mac/Linux
+dir()
+```
+
+### B. Importing Datasets
+
+Read .csv format (comma separated values)
+
+```{r eval = FALSE}
+health <- read.csv('Dataset.csv')
+health <- read.table('Dataset.csv', sep = ',', header = TRUE)
+```
+
+Read .txt format
+
+```{r eval =FALSE}
+read.table('Dataset.txt', sep = ' ')
+```
+
+### C. Packages
+
+Packages are collections of user written functions.
+
+```{r eval = FALSE}
+install.packages('name of package')
+library(name of package)
+```
+
+Use the package *'readr'*, to reading in tabular text data faster than the above functions. Use *'read_table'* when files your data is delimited by spaces, *'read_delim'* when you have other types of delimiters or *'read_csv'* when you have .csv files.
+
+```{r eval = FALSE}
+read_table('Dataset.txt')
+read_delim('Dataset.txt', delim = '\t')
+read_csv('Dataset.csv')  
+```
+
+Use the package *'readxl'* to read in .xls and .xlsx files.
+
+```{r eval = FALSE}
+install.packages('readxl')
+library(readxl)
+read_excel('Dataset.xlsx', sheet = 1, col_names = TRUE)  
+```
+
+### D. Export data file
+
+```{r eval = FALSE}
+write.csv(health, 'health_csv.csv', row.names = FALSE) 
+```
+
+Use *'readr'* to export csv files. About twice as fast as write.csv and never exports row names. 
+
+```{r eval = FALSE}
+write_csv(health, 'health_csv.csv')
+```
+
+## IV. Dataset Manipulation
+
+### A. Rename Columns (Variables)
+
+```{r collapse = TRUE}
+names(health)
+names(health)[5:10] <- c('food', 'smoke', 'exercise', 'happy', 'alcohol', 'doctor')
+names(health)
+```
+
+### B. Working with Missing Data
+
+First we need to recode the -1 values to missing, NAs.
+
+```{r collapse = TRUE}
+health$age
+
+which(health$age == -1)
+
+health$age[which(health$age == -1 )] <- NA
+health$age
+
+is.na(health$age)
+table(is.na(health$age))
+```
+
+Then to run analysis, like the mean function, we must remember the na.rm = TRUE argument.
+
+```{r collapse = TRUE}
+mean(health$age)
+mean(health$age, na.rm = TRUE)
+```
+
+### C. Compute New Variables 
+  	
+To create a new variable in a data frame:
+
+```{r}
+health$health_sum <- health$food + health$smoke + 
+    health$exercise + health$happy + health$alcohol + health$doctor
+
+health[1:5, 5:11]
+```
+
+There are alternative and cleaner methods for summing up variables.
+
+``` {r eval = FALSE}
+rowSums(health[5:10])
+apply(health[, 5:10], 1, sum)
+```
+
+### D. Recode Variables
+
+To recode a continuous variable into a categorical variable, first create a new variable and use logical expressions to determine the new values of the new variable.
+
+```{r collapse = TRUE}
+summary(health$age)   		
+
+health$age_cat[health$age <= 32.5] <-'Group 1'
+health$age_cat[health$age > 32.5 & health$age <= 50] <- 'Group 2'
+health$age_cat[health$age > 50] <-'Group 3'
+
+health[1:5, c('age', 'age_cat')]
+```
+	
+### E. Recode Values
+
+To recode values within the same variable, there is recode function in the *'car'* package.
+
+```{r eval = FALSE}
+install.packages('car')
+library(car)
+health$health22 <- recode(health$smoke, '1=5;2=4;3=3;4=2;5=1')
+```
+
+
+### F. Subsets of a Data Frame 
+
+There are several ways to subset the data frame. You can use the square brackets to specify certain rows and columns. The which command can be used to select rows that meet certain criteria. These two methods can be combined, or you can use the *'subset'* function. 
+
+```{r collapse = TRUE}
+health[, c('id', 'gender', 'smoke')]
+
+health[1:3, c('id', 'gender', 'smoke')]  
+
+which(health$age > 40) 
+which(health$age > 40 & health$age < 50)
+which(health$age < 25 | health$age > 50)  
+
+sub1 <- health[which(health$age > 40), c('age','smoke')]
+sub2 <- subset(health, age > 40, select=c('age','smoke'))
+
+sub1
+```
+
+## V. Descriptive Statistics
+
+### A. Basic Statistics
+
+The *'summary function'* is useful in many situations, it can be used to obtain a six number summary of your variables.
+
+```{r collapse = TRUE}
+summary(health)
+
+summary(health$age)
+```
+
+Or you can use individual functions to obtain one value at a time.
+
+```{r collapse = TRUE}
+mean(health$age, na.rm = TRUE)
+median(health$age, na.rm = TRUE)
+sd(health$age, na.rm = TRUE)
+quantile(health$age, na.rm = TRUE)
+```
+
+### B.  Frequencies and Cross Tabulations
+
+```{r collapse = TRUE}
+table(health$gender)
+
+prop.table(table(health$gender))  
+
+table(health$gender, health$age_cat)  
+
+prop.table(margin.table(table(health$gender, health$age_cat), 1))
+prop.table(margin.table(table(health$gender, health$age_cat), 2))
+```
+
+### C. Correlation 
+```{r }
+cor(health[5:9])
+
+plot(health[5:9])
+```
+
+## VI. Graphics
+
+### Base Graphics
+
+Formula notation is introduced below where you have your dependent variable on the left of the '~' and you have your independent variable(s) on the right side. 
+
+```{r}
+boxplot(health_sum ~ gender, ylab = 'Sum Score', xlab = 'Gender', data = health)   
+```
+
+Use the *'par'* function to include more than one graphic in a single window.
+
+```{r}
+par(mfrow = c(2, 2))
+boxplot(food ~ gender, ylab = 'Organic Food in Diet', xlab = 'Gender', data = health)  
+boxplot(smoke ~ gender, ylab = 'Cigarettes per Week', xlab = 'Gender', data = health)  
+boxplot(exercise ~ gender, ylab = 'Exercise', xlab = 'Gender', data = health)  
+boxplot(happy ~ gender, ylab = 'Happiness', xlab = 'Gender', data = health)  
+```
+
+
+```{r}
+par(mfrow = c(3, 2))
+barplot(table(health$gender))
+plot(health$age, ylab = 'Age')
+hist(health$age, col = 'blue', breaks = 20, xlab = 'Age', main = 'Participants')
+boxplot(age ~ gender, data = health, ylab = 'Age')
+plot(smoke ~ food, pch = '*', data = health, ylab = 'Cigarettes per Week')
+plot(jitter(smoke) ~  jitter(food), pch = 20, col = rainbow(30), xlab = 'Organic Food in Diet', ylab = 'Cigarettes per Week', main = 'Healthy Life Style', data = health)
+par(mfrow = c(1, 1))
+```
+
+### Advanced Graphics with ggplot2
+
+```{r }
+library(ggplot2)
+qplot(x = carat, y = price, color=cut, data = diamonds) 
+```
+
+## Exercise (10 minutes)
+
+I want you to practice your skills by loading the anes_data_2020.csv file located in the `data` folder and doing the following (you may work with the person seated next to you):
+- Create a histogram of the age variable
+- Create a boxplot of the age variable by gender
+- There is a treatment variable in the data set called `treatment` that has four groups. The RA who created this data set claims that they randomly assigned participants to the four groups, but you are skeptical. Create a table of the treatment variable to see if the groups are roughly of equal size.
+- Create a cross tabulation of party ID and immigrant_change6. Does there appear to be a relationship between party ID and support immigration reform? (hint: use the prop.table function to get row percentages)
+- Examine the relationship between two categorical variables of your choice using a cross tabulation. What did you find?
+
+
