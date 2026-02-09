@@ -7,6 +7,8 @@ output: pdf_document
 
 What is Data Wrangling?
 - The process of transforming and mapping data from a raw form into another format that allows for more convenient consumption of the data with the goal of making it more appropriate for analysis.
+- Why is it important? 
+    - Genetics example
 
 # I. Brief Overview of Data Types
 
