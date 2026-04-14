@@ -15,7 +15,7 @@ source("before_script.R")
 ## Prerequisites {-}
 
 ```{r 08-mapping-1, message=FALSE }
-# install.packages(c("sf", "terra", dplyr", "spData"))
+# install.packages(c("sf", "terra", "dplyr", "spData"))
 # install.packages("spDataLarge", repos = "https://geocompx.r-universe.dev")
 library(sf)
 library(terra)
