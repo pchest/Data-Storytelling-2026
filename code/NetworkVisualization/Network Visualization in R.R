@@ -125,7 +125,7 @@ rm(list = ls())
  
 # Set your working directory to the folder containing the workshop files
 # For example, if the folder was called "sunbelt2024":
-setwd("~/Documents/DS_2026/code/sunbelt2024") 
+setwd("~/Dropbox/SIT/SIT_Classes/Public_Pages/Data-Storytelling-2026/code/NetworkVisualization") 
 # If you don't know the path to the folder and you're in RStudio, go to the
 # "Session" menu -> "Set Working Directory" -> "To Source File Location"
 
